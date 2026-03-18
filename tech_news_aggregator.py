@@ -18,7 +18,7 @@ JST = timezone(timedelta(hours=9))
 # 取得するニュースソースの設定
 TRUSTED_DOMAINS = "site:bloomberg.co.jp OR site:reuters.com OR site:kabutan.jp OR site:nikkei.com OR site:finance.yahoo.co.jp"
 FINANCE_QUERY = quote(
-    f"({TRUSTED_DOMAINS}) (株式 OR 市況 OR 決算 OR 米国株 OR 日経平均 OR 経済 OR 半導体 OR テック企業 OR 投資 OR 為替) -NVIDIA -NVDA"
+    f"({TRUSTED_DOMAINS}) (株式 OR 市況 OR 決算 OR 米国株 OR 日経平均 OR 経済 OR 半導体 OR テック企業 OR 投資 OR 為替)"
 )
 BIZ_URL = f"https://news.google.com/rss/search?q={FINANCE_QUERY}&hl=ja&gl=JP&ceid=JP:ja"
 
@@ -33,6 +33,7 @@ NEWS_SOURCES = [
     {"name": "Biz & Stocks", "url": BIZ_URL, "category": "Finance", "limit": 20},
     {"name": "JSer.info", "url": "https://jser.info/rss/", "category": "Web/JS", "limit": 7},
     {"name": "ScanNetSecurity", "url": "https://scan.netsecurity.ne.jp/rss/index.rdf", "category": "Security", "limit": 15},
+    {"name": "The Hacker News", "url": "https://feeds.feedburner.com/TheHackersNews", "category": "Security/Global", "limit": 10},
     {"name": "JPCERT/CC", "url": "https://www.jpcert.or.jp/rss/jpcert-all.rdf", "category": "Security", "limit": 10},
 ]
 
