@@ -21,6 +21,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
+        cache: 'pip'
 
     - name: Install dependencies
       run: pip install -r requirements.txt
@@ -30,17 +31,28 @@ jobs:
       env:
         GITHUB_ACTIONS: "true"
 
-    # ファイル名を index.html にリネーム
-    # Jekyllを無効化する .nojekyll を作成
     - name: Prepare for Pages
       run: |
-        mv tech_news.html index.html
-        touch .nojekyll
+        mkdir _site
+        mv tech_news.html _site/index.html
+        touch _site/.nojekyll
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: '.'
+        path: '_site'
+
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "::error::News aggregator build failed. Check logs for details."
+        # GitHub Issueを自動作成
+        gh issue create \
+          --title "🚨 News feed build failed ($(date -u +%Y-%m-%d))" \
+          --body "The scheduled news aggregator build failed. Check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details." \
+          --label "bug" || true
+      env:
+        GH_TOKEN: ${{ github.token }}
 
   deploy:
     needs: build
