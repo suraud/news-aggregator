@@ -2,16 +2,17 @@ name: Update Tech News Dashboard
 
 on:
   schedule:
-    # 毎日 日本時間 07:00, 12:00, 18:00 に実行 (UTCでは 22:00, 03:00, 09:00)
     - cron: '0 22,3,9 * * *'
-  workflow_dispatch: # 手動実行も可能にする
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write      # Pagesへの書き込み権限
+  id-token: write   # デプロイ認証用
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # リポジトリへの書き込み権限を付与
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -22,19 +23,30 @@ jobs:
         python-version: '3.12'
 
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      run: pip install -r requirements.txt
 
     - name: Run news aggregator
       run: python tech_news_aggregator.py
       env:
-        GITHUB_ACTIONS: "true" # ブラウザを開かないように環境変数を渡す
+        GITHUB_ACTIONS: "true"
 
-    - name: Commit and Push changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add -f tech_news.html
-        git commit -m "Update news dashboard [skip ci]" || echo "No changes to commit"
-        git push
+    # ファイル名を index.html にリネームして公開準備
+    - name: Rename for Pages
+      run: mv tech_news.html index.html
+
+    # アーティファクト（公開用データ）のアップロード
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.' # ルールディレクトリ全体をアップロード
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
