@@ -7,8 +7,8 @@ on:
 
 permissions:
   contents: read
-  pages: write      # Pagesへの書き込み権限
-  id-token: write   # デプロイ認証用
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -30,15 +30,17 @@ jobs:
       env:
         GITHUB_ACTIONS: "true"
 
-    # ファイル名を index.html にリネームして公開準備
-    - name: Rename for Pages
-      run: mv tech_news.html index.html
+    # ファイル名を index.html にリネーム
+    # Jekyllを無効化する .nojekyll を作成
+    - name: Prepare for Pages
+      run: |
+        mv tech_news.html index.html
+        touch .nojekyll
 
-    # アーティファクト（公開用データ）のアップロード
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: '.' # ルールディレクトリ全体をアップロード
+        path: '.'
 
   deploy:
     needs: build
